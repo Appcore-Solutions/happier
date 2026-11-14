@@ -66,6 +66,7 @@ export async function handleUpdateAccountSocketUpdate(params: {
         ...currentProfile,
         firstName: accountUpdate.firstName !== undefined ? accountUpdate.firstName : currentProfile.firstName,
         lastName: accountUpdate.lastName !== undefined ? accountUpdate.lastName : currentProfile.lastName,
+        displayName: accountUpdate.displayName !== undefined ? accountUpdate.displayName : currentProfile.displayName,
         username: accountUpdate.username !== undefined ? accountUpdate.username : currentProfile.username,
         avatar: accountUpdate.avatar !== undefined ? accountUpdate.avatar : currentProfile.avatar,
         linkedProviders:

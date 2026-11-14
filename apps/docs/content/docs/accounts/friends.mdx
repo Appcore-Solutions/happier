@@ -21,6 +21,17 @@ Happier uses a single, unique identifier for discovery: `account.username`.
 
 Users should not need to know whether a username came from GitHub or was set manually — they just search `@username`.
 
+### Display name
+
+In development builds, you can also choose a **display name**: the friendly name friends see instead of your `@username`, in the friends list, on sharing screens, and above the messages you send in a shared session. Set it in **Settings → Account → Display name**; the setting appears while Friends is on.
+
+- A display name does not have to be unique, so sharing screens keep showing the `@username` beside it.
+- It can be up to 128 characters on a single line.
+- Leaving it empty clears it. Happier then shows the name from your linked GitHub account, if any, and otherwise your `@username`.
+- Connecting or reconnecting GitHub never replaces a display name you chose.
+- Search still matches `@username`, not display names.
+- Friends see a new display name the next time their app loads your profile.
+
 ## GitHub connection (OAuth)
 
 When a user connects GitHub:

@@ -25,16 +25,12 @@ import { parsePlainSessionAgentState, parsePlainSessionMetadata } from '@/sync/e
 import { readStoredSessionRawRecord } from '@/sync/runtime/readStoredSessionContent';
 import { ActivitySpinner } from '@/components/ui/feedback/ActivitySpinner';
 import { Icon } from '@/components/ui/icons/Icon';
+import { readChosenOrRealName } from '@/sync/domains/social/friendTypes';
+import type { ShareUserProfile } from '@/sync/domains/social/sharingTypes';
 
 const SHARE_SCREEN_OPTIONS = { headerShown: false } as const;
 
-type ShareOwner = {
-    id: string;
-    username: string | null;
-    firstName: string | null;
-    lastName: string | null;
-    avatar: string | null;
-};
+type ShareOwner = ShareUserProfile;
 
 type PublicShareResponse = {
     session: {
@@ -100,9 +96,9 @@ export function resolvePublicShareTokenParam(
 
 function getOwnerDisplayName(owner: ShareOwner | null): string {
     if (!owner) return t('status.unknown');
-    if (owner.username) return `@${owner.username}`;
-    const fullName = [owner.firstName, owner.lastName].filter(Boolean).join(' ');
-    return fullName || t('status.unknown');
+    const name = readChosenOrRealName(owner);
+    if (name) return name;
+    return owner.username ? `@${owner.username}` : t('status.unknown');
 }
 
 function normalizeMessageSeq(message: Readonly<{ seq?: number | null }>): number | undefined {

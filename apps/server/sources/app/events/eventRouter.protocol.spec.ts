@@ -320,7 +320,7 @@ describe("eventRouter payloads (protocol container)", () => {
             {
                 id: "shr-1",
                 sessionId: "s1",
-                sharedByUser: { id: "u1", firstName: null, lastName: null, username: "x", avatar: null },
+                sharedByUser: { id: "u1", firstName: null, lastName: null, displayName: null, username: "x", avatar: null },
                 accessLevel: "view",
                 canApprovePermissions: true,
                 encryptedDataKey: new Uint8Array([1, 2, 3]),

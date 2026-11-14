@@ -30,6 +30,7 @@ export function registerAccountProfileRoute(app: Fastify): void {
             select: {
                 firstName: true,
                 lastName: true,
+                displayName: true,
                 username: true,
                 avatar: true,
             }
@@ -45,6 +46,7 @@ export function registerAccountProfileRoute(app: Fastify): void {
             timestamp: Date.now(),
             firstName: user.firstName,
             lastName: user.lastName,
+            displayName: user.displayName,
             username: user.username,
             avatar: user.avatar ? { ...user.avatar, url: getPublicUrl(user.avatar.path) } : null,
             linkedProviders,

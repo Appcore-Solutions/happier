@@ -22,6 +22,8 @@ import { useHappyAction } from '@/hooks/ui/useHappyAction';
 import { getAgentCore, resolveAgentIdFromConnectedServiceId } from '@/agents/catalog/catalog';
 import { HappyError } from '@/utils/errors/errors';
 import { setAccountUsername } from '@/sync/api/account/apiUsername';
+import { DISPLAY_NAME_UNSUPPORTED_ERROR, setAccountDisplayName } from '@/sync/api/account/apiAccountDisplayName';
+import { ACCOUNT_DISPLAY_NAME_MAX_LENGTH, normalizeAccountDisplayName } from '@happier-dev/protocol';
 import { storage } from '@/sync/domains/state/storageStore';
 import { useFriendsEnabled } from '@/hooks/server/useFriendsEnabled';
 import { useFriendsIdentityReadiness } from '@/hooks/server/useFriendsIdentityReadiness';
@@ -152,6 +154,48 @@ export default React.memo(() => {
         }
     });
 
+    // A display name is only ever shown to friends and people a session is shared with.
+    const canSetDisplayName = friendsEnabled;
+    const [savingDisplayName, saveDisplayName] = useHappyAction(async () => {
+        if (!auth.credentials) return;
+        if (!canSetDisplayName) return;
+
+        const next = await Modal.prompt(
+            t('settingsAccount.displayName'),
+            t('settingsAccount.displayNamePrompt'),
+            {
+                placeholder: t('settingsAccount.displayName'),
+                defaultValue: profile.displayName ?? undefined,
+                confirmText: t('common.save'),
+                cancelText: t('common.cancel'),
+            },
+        );
+        if (next == null) return;
+
+        const invalidMessage = t('settingsAccount.displayNameInvalid', { max: ACCOUNT_DISPLAY_NAME_MAX_LENGTH });
+        const normalized = normalizeAccountDisplayName(next);
+        if (!normalized.ok) {
+            await Modal.alert(t('common.error'), invalidMessage);
+            return;
+        }
+
+        try {
+            const res = await setAccountDisplayName(auth.credentials, normalized.displayName);
+            applyProfile({ ...profile, displayName: res.displayName });
+        } catch (e) {
+            if (e instanceof HappyError) {
+                const msg =
+                    e.message === 'invalid-display-name' ? invalidMessage
+                        : e.message === DISPLAY_NAME_UNSUPPORTED_ERROR ? t('settingsAccount.displayNameUnsupported')
+                            : e.message === 'friends-disabled' ? t('friends.disabled')
+                                : e.message;
+                await Modal.alert(t('common.error'), msg);
+                return;
+            }
+            throw e;
+        }
+    });
+
     const handleShowSecret = () => {
         setShowSecret(!showSecret);
     };
@@ -235,13 +279,25 @@ export default React.memo(() => {
 
                 {/* Profile Section */}
                 <ItemGroup title={t('settingsAccount.profile')}>
-                        {displayName && (
+                        {canSetDisplayName ? (
+                            <Item
+                                testID="settings-account-display-name"
+                                title={t('settingsAccount.displayName')}
+                                detail={displayName ?? undefined}
+                                subtitle={t('settingsAccount.displayNameSubtitle')}
+                                onPress={saveDisplayName}
+                                disabled={savingDisplayName}
+                                loading={savingDisplayName}
+                                showChevron={false}
+                                icon={<Icon name="person" size={29} color={theme.colors.text.secondary} />}
+                            />
+                        ) : displayName ? (
                             <Item
                                 title={t('settingsAccount.name')}
                                 detail={displayName}
                                 showChevron={false}
                             />
-                        )}
+                        ) : null}
                         {canSetUsername && (
                             <Item
                                 title={t('profile.username')}

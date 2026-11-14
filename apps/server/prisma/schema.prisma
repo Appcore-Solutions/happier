@@ -44,6 +44,9 @@ model Account {
     // Profile
     firstName String?
     lastName  String?
+    /// Name the person chose to show others. Identity providers never write it, so clearing it
+    /// falls back to the provider-supplied first/last name, then the username.
+    displayName String?
     username  String? @unique
     /// [ImageRef]
     avatar    Json?

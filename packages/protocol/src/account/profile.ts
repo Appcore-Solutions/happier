@@ -57,6 +57,8 @@ export const AccountProfileSchema = lazySchema(() => z.object({
   timestamp: z.number().int().min(0).optional().default(0),
   firstName: z.string().nullable().optional().default(null),
   lastName: z.string().nullable().optional().default(null),
+  /** Name the person chose to show others; absent from servers that predate it. */
+  displayName: z.string().nullable().optional(),
   username: z.string().nullable().optional().default(null),
   avatar: ImageRefSchema.nullable().optional().default(null),
   linkedProviders: z.array(LinkedProviderSchema).default([]),

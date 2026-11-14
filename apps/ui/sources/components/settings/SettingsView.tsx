@@ -21,6 +21,7 @@ import { useUnistyles } from 'react-native-unistyles';
 import { layout } from '@/components/ui/layout/layout';
 import { useHappyAction } from '@/hooks/ui/useHappyAction';
 import { getDisplayName, getAvatarUrl, getBio } from '@/sync/domains/profiles/profile';
+import { readChosenOrRealName } from '@/sync/domains/social/friendTypes';
 import { Avatar } from '@/components/ui/avatar/Avatar';
 import { t } from '@/text';
 import { canRequestReview, requestReview } from '@/utils/system/requestReview';
@@ -309,7 +310,7 @@ export const SettingsView = React.memo(function SettingsView() {
             {/* App Info Header */}
             <View style={{ maxWidth: layout.maxWidth, alignSelf: 'center', width: '100%' }}>
                 <View style={{ alignItems: 'center', paddingVertical: 24, backgroundColor: theme.colors.surface.base, marginTop: 16, borderRadius: 12, marginHorizontal: 16 }}>
-                    {profile.firstName ? (
+                    {readChosenOrRealName(profile) ? (
                         // Profile view: Avatar + name + version
                         <>
                             <View style={{ marginBottom: 12 }}>

@@ -19,9 +19,28 @@ export {
 // Utility functions
 //
 
-export function getDisplayName(profile: UserProfile): string {
-    const fullName = [profile.firstName, profile.lastName].filter(Boolean).join(' ');
-    return fullName || profile.username;
+/** The name facts every profile shape (friend, share, own account) carries. */
+export type PersonNameFacts = Readonly<{
+    displayName?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    username?: string | null;
+}>;
+
+/**
+ * The name a person chose to show others, else their identity-provider name; null when neither
+ * exists. Every surface that names a person starts from this order.
+ */
+export function readChosenOrRealName(person: PersonNameFacts): string | null {
+    const chosen = person.displayName?.trim();
+    if (chosen) return chosen;
+    const realName = [person.firstName, person.lastName].filter(Boolean).join(' ');
+    return realName || null;
+}
+
+/** How Happier names another person: chosen name, then provider name, then username. */
+export function getDisplayName(person: PersonNameFacts): string {
+    return readChosenOrRealName(person) ?? person.username ?? '';
 }
 
 export function isFriend(status: RelationshipStatus): boolean {

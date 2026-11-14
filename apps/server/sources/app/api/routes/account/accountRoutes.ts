@@ -2,6 +2,7 @@ import { type Fastify } from "../../types";
 import { registerAccountProfileRoute } from "./registerAccountProfileRoute";
 import { registerAccountIdentityVisibilityRoute } from "./registerAccountIdentityVisibilityRoute";
 import { registerAccountUsernameRoute } from "./registerAccountUsernameRoute";
+import { registerAccountDisplayNameRoute } from "./registerAccountDisplayNameRoute";
 import { registerAccountSettingsRoutes } from "./registerAccountSettingsRoutes";
 import { registerAccountSettingsHistoryRoutes } from "./registerAccountSettingsHistoryRoutes";
 import { registerAccountUsageRoutes } from "./registerAccountUsageRoutes";
@@ -16,6 +17,7 @@ export function accountRoutes(app: Fastify): void {
     registerAccountProfileRoute(app);
     registerAccountIdentityVisibilityRoute(app);
     registerAccountUsernameRoute(app);
+    registerAccountDisplayNameRoute(app);
     registerAccountSettingsRoutes(app);
     registerAccountSettingsHistoryRoutes(app);
     registerAccountEncryptionRoutes(app);

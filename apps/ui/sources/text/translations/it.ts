@@ -10333,6 +10333,11 @@ settingsSession: {
     linkNewDeviceSubtitle: "Scansiona il codice QR mostrato sul tuo nuovo dispositivo",
     profile: "Profilo",
     name: "Nome",
+    displayName: 'Nome visualizzato',
+    displayNameSubtitle: 'Visibile agli amici e nelle sessioni condivise',
+    displayNamePrompt: 'I tuoi amici vedono questo nome. Lascialo vuoto per usare il nome del tuo account.',
+    displayNameInvalid: ({ max }: { max: number }) => `Usa al massimo ${max} caratteri su una sola riga.`,
+    displayNameUnsupported: 'Questo Relay non supporta ancora i nomi visualizzati.',
     github: "GitHub",
     showGitHubOnProfile: "Mostra nel profilo",
     showProviderOnProfile: ({ provider }: { provider: string }) =>

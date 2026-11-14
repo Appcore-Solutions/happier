@@ -5,6 +5,7 @@ import type { AccountProfile as ProtocolAccountProfile } from "@happier-dev/prot
 export type AccountProfile = {
     firstName: string | null;
     lastName: string | null;
+    displayName?: string | null;
     username: string | null;
     avatar: ImageRef | null;
     linkedProviders: LinkedProvider[];

@@ -7,6 +7,7 @@ export const PROFILE_SELECT = {
     id: true,
     firstName: true,
     lastName: true,
+    displayName: true,
     username: true,
     avatar: true
 } as const;
@@ -18,6 +19,7 @@ export type UserProfile = {
     id: string;
     firstName: string | null;
     lastName: string | null;
+    displayName: string | null;
     username: string | null;
     avatar: string | null;
 };
@@ -26,6 +28,7 @@ export function toShareUserProfile(profile: {
     id: string;
     firstName: string | null;
     lastName: string | null;
+    displayName: string | null;
     username: string | null;
     avatar: any | null;
 }): UserProfile {
@@ -36,6 +39,7 @@ export function toShareUserProfile(profile: {
         id: profile.id,
         firstName: profile.firstName,
         lastName: profile.lastName,
+        displayName: profile.displayName,
         username: profile.username,
         avatar: avatarUrl
     };

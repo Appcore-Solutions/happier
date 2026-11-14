@@ -30,7 +30,7 @@ import { sync } from '@/sync/sync';
 import { useHappyAction } from '@/hooks/ui/useHappyAction';
 import { HappyError } from '@/utils/errors/errors';
 import { getSessionFriendsList } from '@/sync/api/social/createSessionSocialRequest';
-import { UserProfile } from '@/sync/domains/social/friendTypes';
+import { getDisplayName, UserProfile } from '@/sync/domains/social/friendTypes';
 import { encryptDataKeyForPublicShare } from '@/sync/encryption/publicShareEncryption';
 import { getRandomBytes } from 'expo-crypto';
 import { encryptDataKeyForRecipientV0, verifyRecipientContentPublicKeyBinding } from '@/sync/encryption/directShareEncryption';
@@ -393,7 +393,7 @@ function SharingManagementContent({ sessionId }: { sessionId: string }) {
                         shares.map(share => (
                             <Item
                                 key={share.id}
-                                title={share.sharedWithUser.username || [share.sharedWithUser.firstName, share.sharedWithUser.lastName].filter(Boolean).join(' ')}
+                                title={getDisplayName(share.sharedWithUser)}
                                 subtitle={`@${share.sharedWithUser.username} • ${t(`session.sharing.${share.accessLevel === 'view' ? 'viewOnly' : share.accessLevel === 'edit' ? 'canEdit' : 'canManage'}`)}`}
                                 icon={<Icon name="person" size={29} color={theme.colors.accent.blue} />}
                                 onPress={openShareDialog}

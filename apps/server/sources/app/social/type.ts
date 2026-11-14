@@ -62,6 +62,7 @@ export function buildUserProfile(
         id: string;
         firstName: string | null;
         lastName: string | null;
+        displayName: string | null;
         username: string | null;
         avatar: ImageRef | null;
         publicKey: string | null;
@@ -106,6 +107,7 @@ export function buildUserProfile(
         id: account.id,
         firstName: account.firstName || '',
         lastName: account.lastName,
+        displayName: account.displayName,
         avatar,
         username: account.username || social.suggestedUsername || '',
         bio: social.bio,

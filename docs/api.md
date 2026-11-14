@@ -118,6 +118,7 @@ read proves the Session is already absent.
 
 ### Account and usage
 - `GET /v1/account/profile`
+- `POST /v1/account/display-name` — `{ displayName: string | null }`; available while Friends is enabled. In development source, the name a person chooses to show others: trimmed, empty or `null` clears it, and up to `ACCOUNT_DISPLAY_NAME_MAX_LENGTH` (128) code points without control characters (`normalizeAccountDisplayName` in `@happier-dev/protocol` owns the rule). Profiles (`/v1/account/profile`, `/v1/user/:id`, friends, share profiles) carry it as `displayName`; readers name a person by display name, then first/last name, then username.
 - `GET /v1/account/settings`
 - `POST /v1/account/settings`
 - `POST /v1/usage/query`

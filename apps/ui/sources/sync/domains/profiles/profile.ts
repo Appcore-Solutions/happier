@@ -1,4 +1,5 @@
 import { AccountProfileSchema, type AccountProfile } from '@happier-dev/protocol';
+import { readChosenOrRealName } from '@/sync/domains/social/friendTypes';
 
 //
 // Types
@@ -49,9 +50,8 @@ function getPrimaryLinkedProvider(profile: Profile) {
 }
 
 export function getDisplayName(profile: Profile): string | null {
-    if (profile.firstName || profile.lastName) {
-        return [profile.firstName, profile.lastName].filter(Boolean).join(' ');
-    }
+    const named = readChosenOrRealName(profile);
+    if (named) return named;
     const primary = getPrimaryLinkedProvider(profile);
     if (primary?.displayName) return primary.displayName;
     if (primary?.login) return primary.login;

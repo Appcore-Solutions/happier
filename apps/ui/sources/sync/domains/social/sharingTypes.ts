@@ -31,6 +31,8 @@ export interface ShareUserProfile {
     firstName: string | null;
     /** User's last name, if set */
     lastName: string | null;
+    /** Name the user chose to show others; absent from servers that predate it */
+    displayName?: string | null;
     /** URL to user's avatar image, if set */
     avatar: string | null;
 }

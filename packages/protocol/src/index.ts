@@ -3492,6 +3492,16 @@ export {
 } from './account/profile.js';
 
 export {
+  ACCOUNT_DISPLAY_NAME_MAX_LENGTH,
+  AccountDisplayNameUpdateRequestSchema,
+  AccountDisplayNameUpdateResponseSchema,
+  normalizeAccountDisplayName,
+  type AccountDisplayNameNormalization,
+  type AccountDisplayNameUpdateRequest,
+  type AccountDisplayNameUpdateResponse,
+} from './account/displayName.js';
+
+export {
   AccountEncryptionModeResponseSchema,
   AccountEncryptionModeUpdateRequestSchema,
   type AccountEncryptionModeResponse,

@@ -3,6 +3,7 @@ import { FeedItem } from '@/sync/domains/social/feedTypes';
 import { t } from '@/text';
 import { useRouter } from 'expo-router';
 import { useUser } from '@/sync/domains/state/storage';
+import { getDisplayName } from '@/sync/domains/social/friendTypes';
 import { Avatar } from '@/components/ui/avatar/Avatar';
 import { Item } from '@/components/ui/lists/Item';
 import { useUnistyles } from 'react-native-unistyles';
@@ -51,7 +52,7 @@ export const FeedItemCard = React.memo(({ item }: FeedItemCardProps) => {
             
             return (
                 <Item
-                    title={t('feed.friendRequestFrom', { name: user!.firstName || user!.username })}
+                    title={t('feed.friendRequestFrom', { name: getDisplayName(user!) })}
                     subtitle={getTimeAgo(item.createdAt)}
                     leftElement={avatarElement}
                     onPress={() => router.push(`/user/${user!.id}`)}
@@ -73,7 +74,7 @@ export const FeedItemCard = React.memo(({ item }: FeedItemCardProps) => {
             
             return (
                 <Item
-                    title={t('feed.friendAccepted', { name: user!.firstName || user!.username })}
+                    title={t('feed.friendAccepted', { name: getDisplayName(user!) })}
                     subtitle={getTimeAgo(item.createdAt)}
                     leftElement={avatarElement}
                     onPress={() => router.push(`/user/${user!.id}`)}

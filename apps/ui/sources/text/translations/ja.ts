@@ -10238,6 +10238,11 @@ settingsSession: {
     linkNewDeviceSubtitle: "新しいデバイスに表示されたQRコードをスキャンします",
     profile: "プロフィール",
     name: "名前",
+    displayName: '表示名',
+    displayNameSubtitle: 'フレンドと共有セッションに表示されます',
+    displayNamePrompt: 'フレンドにはこの名前が表示されます。空欄にするとアカウント名が使われます。',
+    displayNameInvalid: ({ max }: { max: number }) => `1行で${max}文字以内にしてください。`,
+    displayNameUnsupported: 'この Relay はまだ表示名に対応していません。',
     github: "GitHub",
     showGitHubOnProfile: "プロフィールに表示",
     showProviderOnProfile: ({ provider }: { provider: string }) =>

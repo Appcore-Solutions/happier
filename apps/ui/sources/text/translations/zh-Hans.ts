@@ -9648,6 +9648,11 @@ settingsSession: {
     linkNewDeviceSubtitle: "扫描新设备上显示的二维码",
     profile: "个人资料",
     name: "姓名",
+    displayName: '显示名称',
+    displayNameSubtitle: '好友和共享会话中可见',
+    displayNamePrompt: '好友会看到这个名称。留空则使用账户名称。',
+    displayNameInvalid: ({ max }: { max: number }) => `请在一行内使用不超过 ${max} 个字符。`,
+    displayNameUnsupported: '此 Relay 暂不支持显示名称。',
     github: "GitHub",
     showGitHubOnProfile: "在个人资料中显示",
     showProviderOnProfile: ({ provider }: { provider: string }) =>

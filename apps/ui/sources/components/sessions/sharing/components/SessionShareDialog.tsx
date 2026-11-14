@@ -6,6 +6,7 @@ import { ItemList } from '@/components/ui/lists/ItemList';
 import { ItemGroup } from '@/components/ui/lists/ItemGroup';
 import { t } from '@/text';
 import { SessionShare, ShareAccessLevel } from '@/sync/domains/social/sharingTypes';
+import { getDisplayName } from '@/sync/domains/social/friendTypes';
 import { Avatar } from '@/components/ui/avatar/Avatar';
 import type { CustomModalInjectedProps } from '@/modal';
 import { Icon } from '@/components/ui/icons/Icon';
@@ -111,12 +112,17 @@ export const SessionShareDialog = memo(function SessionShareDialog({
                     {shares.length > 0 ? (
                         shares.map((share) => {
                             const accessLevelLabel = getAccessLevelLabel(share.accessLevel);
-                            const userName = share.sharedWithUser.username || [share.sharedWithUser.firstName, share.sharedWithUser.lastName]
-                                .filter(Boolean)
-                                .join(' ');
-                            const subtitle = share.canApprovePermissions && share.accessLevel !== 'view'
-                                ? `${accessLevelLabel} • ${t('session.sharing.permissionApprovals')}`
-                                : accessLevelLabel;
+                            const userName = getDisplayName(share.sharedWithUser);
+                            // Chosen names need not be unique, so the handle stays visible beside it.
+                            const subtitle = [
+                                share.sharedWithUser.username && share.sharedWithUser.username !== userName
+                                    ? `@${share.sharedWithUser.username}`
+                                    : null,
+                                accessLevelLabel,
+                                share.canApprovePermissions && share.accessLevel !== 'view'
+                                    ? t('session.sharing.permissionApprovals')
+                                    : null,
+                            ].filter(Boolean).join(' • ');
 
                             return (
                                 <React.Fragment key={share.id}>

@@ -1,0 +1,1 @@
+ALTER TABLE `Account` ADD COLUMN `displayName` VARCHAR(191) NULL;

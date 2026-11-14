@@ -10,6 +10,8 @@ export const UserProfileSchema = lazySchema(() => z.object({
   id: z.string(),
   firstName: z.string(),
   lastName: z.string().nullable(),
+  /** Name the person chose to show others; absent from servers that predate it. */
+  displayName: z.string().nullable().optional(),
   avatar: ImageRefSchema.nullable(),
   username: z.string(),
   bio: z.string().nullable(),

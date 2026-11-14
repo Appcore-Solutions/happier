@@ -267,6 +267,7 @@ export type UpdateEvent = {
         id: string;
         firstName: string | null;
         lastName: string | null;
+        displayName: string | null;
         username: string | null;
         avatar: any | null;
     };

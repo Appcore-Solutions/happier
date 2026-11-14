@@ -9975,6 +9975,11 @@ settingsSession: {
     linkNewDeviceSubtitle: "Отсканируйте QR‑код, показанный на новом устройстве",
     profile: "Профиль",
     name: "Имя",
+    displayName: 'Отображаемое имя',
+    displayNameSubtitle: 'Видно друзьям и в общих сессиях',
+    displayNamePrompt: 'Друзья видят это имя. Оставьте поле пустым, чтобы использовать имя аккаунта.',
+    displayNameInvalid: ({ max }: { max: number }) => `Используйте не более ${max} символов в одной строке.`,
+    displayNameUnsupported: 'Этот Relay пока не поддерживает отображаемые имена.',
     github: "GitHub",
     showGitHubOnProfile: "Показывать в профиле",
     showProviderOnProfile: ({ provider }: { provider: string }) =>
