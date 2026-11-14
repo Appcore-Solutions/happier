@@ -1,0 +1,5 @@
+{$HAPPIER_DOMAIN} {
+	encode zstd gzip
+	# Serves the web app and API, including the WebSocket upgrades live updates need.
+	reverse_proxy relay:3005
+}

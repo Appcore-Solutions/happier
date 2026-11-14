@@ -1,0 +1,64 @@
+name: Fork relay image
+
+# Fork-only: builds the self-hosted relay (server + embedded web app) from this fork's source with
+# the Dockerfile's `relay-server-local-source` target, and publishes it to this fork's GitHub
+# Container Registry. The repository guard keeps it from ever running in happier-dev/happier,
+# whose own pipeline publishes signed release artifacts instead.
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+concurrency:
+  group: fork-relay-image-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    if: github.repository == 'Appcore-Solutions/happier'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+
+      - name: Login to GHCR
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Build and push relay image
+        env:
+          OWNER: ${{ github.repository_owner }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          # GHCR image names must be lowercase.
+          image="ghcr.io/${OWNER,,}/happier-relay"
+          short_sha="${SHA::12}"
+          docker buildx build \
+            --target relay-server-local-source \
+            --platform linux/amd64 \
+            --label "org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}" \
+            --label "org.opencontainers.image.revision=${SHA}" \
+            --tag "${image}:dev" \
+            --tag "${image}:sha-${short_sha}" \
+            --push \
+            .
+          {
+            echo "### Relay image published"
+            echo ""
+            echo "- \`${image}:dev\` (moves with each push to dev)"
+            echo "- \`${image}:sha-${short_sha}\` (fixed to this commit)"
+          } >> "$GITHUB_STEP_SUMMARY"

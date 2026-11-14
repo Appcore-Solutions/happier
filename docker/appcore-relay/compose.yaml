@@ -1,0 +1,49 @@
+# Appcore relay: this fork's relay (server + web app) behind Caddy, which obtains and renews the
+# HTTPS certificate for HAPPIER_DOMAIN automatically. See README.md in this folder.
+
+services:
+  relay:
+    image: ghcr.io/appcore-solutions/happier-relay:${HAPPIER_RELAY_TAG:-dev}
+    restart: unless-stopped
+    environment:
+      HAPPIER_WEBAPP_URL: https://${HAPPIER_DOMAIN:?set HAPPIER_DOMAIN in .env}
+      # Trust forwarded client addresses only from the Caddy container's fixed address below.
+      HAPPIER_SERVER_TRUST_PROXY: 172.30.10.2
+      # Friends powers direct sharing and display names. Without GitHub sign-in, people pick usernames.
+      HAPPIER_FEATURE_SOCIAL_FRIENDS__ENABLED: "1"
+      HAPPIER_FEATURE_SOCIAL_FRIENDS__ALLOW_USERNAME: "1"
+    volumes:
+      - relay-data:/data
+    networks:
+      relay:
+        ipv4_address: 172.30.10.3
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - relay
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      HAPPIER_DOMAIN: ${HAPPIER_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      relay:
+        ipv4_address: 172.30.10.2
+
+networks:
+  relay:
+    ipam:
+      config:
+        - subnet: 172.30.10.0/24
+
+volumes:
+  relay-data:
+  caddy-data:
+  caddy-config:
