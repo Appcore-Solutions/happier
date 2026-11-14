@@ -168,6 +168,7 @@ describe("SessionMessage row revision (SQLite integration)", () => {
             localId,
             content,
             messageRole: null,
+            pendingAuthorAccountId: null,
         }));
         await expect(readRevision(sessionId, localId)).resolves.toMatchObject({ rowRevision: 0n });
 
@@ -177,6 +178,7 @@ describe("SessionMessage row revision (SQLite integration)", () => {
                 localId,
                 content,
                 messageRole: "user",
+                pendingAuthorAccountId: null,
             });
             expect(roleBackfill).toMatchObject({ ok: true, didUpdate: true });
             throw new Error("test rollback");
@@ -188,6 +190,7 @@ describe("SessionMessage row revision (SQLite integration)", () => {
             localId,
             content,
             messageRole: "user",
+            pendingAuthorAccountId: null,
         }))).resolves.toMatchObject({ ok: true, didUpdate: true });
         await expect(readRevision(sessionId, localId)).resolves.toMatchObject({ rowRevision: 1n });
     });

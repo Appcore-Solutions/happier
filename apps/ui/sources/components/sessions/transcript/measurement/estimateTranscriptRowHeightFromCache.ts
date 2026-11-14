@@ -137,6 +137,10 @@ function resolveCarriedUtteranceRowHeightPx(params: Readonly<{
 function committedRowPaintsChromeBeyondTheBubble(
     message: Extract<Message, { kind: 'user-text' }>,
 ): boolean {
+    // `MessageView` paints a sender line above the bubble for a prompt another participant sent.
+    // Whether the author is the viewer is a transcript-level fact this row-level estimate does not
+    // see, so any recorded author leaves the carry; that row is measured on mount instead.
+    if (message.authorAccountId !== undefined) return true;
     const media = parseSessionMediaMessageMeta(message.meta);
     if (media.inlineImages.length > 0 || media.unavailableMedia.length > 0) return true;
     if (media.legacyAttachments !== undefined && media.legacyAttachments !== null) return true;

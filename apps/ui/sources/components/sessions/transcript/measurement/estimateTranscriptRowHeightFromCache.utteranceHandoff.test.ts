@@ -202,4 +202,11 @@ describe('rows whose committed bubble paints more than the pending one did', () 
         expect(resolveCommittedUtteranceIdentityForEstimate(messageItem(), () => withMeta(null)))
             .toBe('utterance:utt-1');
     });
+
+    it('excludes a prompt with a recorded author, which may paint a sender line above the bubble', () => {
+        expect(resolveCommittedUtteranceIdentityForEstimate(
+            messageItem(),
+            () => ({ ...userMessage(), authorAccountId: 'friend-account' } as unknown as Message),
+        )).toBeNull();
+    });
 });

@@ -105,6 +105,7 @@ Field names below match on-wire payloads.
 
 - `new-message`
   - `body`: `{ t: "new-message", sid, message: { id, seq, content, localId, createdAt, updatedAt } }`
+  - In development source, `message` (here, in `message-updated`, and in the HTTP message list and by-local-id reads) may carry `authorAccountId`: the Account that submitted a user-role row. The server stamps it from the authenticated writer, or from the Pending row's author when the owner's runtime settles that row, so a participant cannot claim another Account's authorship. It is absent for non-user rows and rows written before attribution existed. Clients ignore it if they predate it; the UI shows the sender on prompts by any Account other than the viewer's.
 
 - `update-account`
   - `body`: `{ t: "update-account", id, settings?, github? }`

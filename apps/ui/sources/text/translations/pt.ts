@@ -11107,6 +11107,8 @@ settingsSession: {
   message: {
     provenanceFrom: ({ source }: { source: string }) => `De ${source}`,
     provenanceSession: 'Sessão',
+    sentBy: ({ name }: { name: string }) => `Enviado por ${name}`,
+    authorUnknown: 'Outro participante',
     sessionReferenceUnavailable: "Sessão indisponível",
     sessionReferenceOpen: ({ name }: { name: string }) => `Abrir a sessão ${name}`,
     switchedToMode: ({ mode }: { mode: string }) => `Mudou para o modo ${mode}`,

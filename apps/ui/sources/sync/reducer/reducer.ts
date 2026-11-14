@@ -135,6 +135,7 @@ import { markRunningToolsUnavailable } from "./helpers/markRunningToolsUnavailab
 import { compareIncomingTranscriptRowsOldestFirst, normalizeTranscriptSeq } from "../domains/messages/transcriptOrdering";
 import {
     applyTranscriptObservationMetadata,
+    readTranscriptObservationMetadata,
     type TranscriptObservationMetadata,
 } from "../domains/messages/transcriptObservationProvenance";
 
@@ -738,16 +739,7 @@ function convertReducerMessageToMessage(
     state: ReducerState,
     ancestorMessageIds?: ReadonlySet<string>,
 ): Message | null {
-    const observationMetadata: TranscriptObservationMetadata = {
-        ...(reducerMsg.sourceCreatedAt !== undefined ? { sourceCreatedAt: reducerMsg.sourceCreatedAt } : {}),
-        ...(reducerMsg.sourceUpdatedAt !== undefined ? { sourceUpdatedAt: reducerMsg.sourceUpdatedAt } : {}),
-        ...(reducerMsg.transcriptObservationProvenance !== undefined
-            ? { transcriptObservationProvenance: reducerMsg.transcriptObservationProvenance }
-            : {}),
-        ...(reducerMsg.deliveryResolution !== undefined
-            ? { deliveryResolution: reducerMsg.deliveryResolution }
-            : {}),
-    };
+    const observationMetadata = readTranscriptObservationMetadata(reducerMsg);
     if (reducerMsg.role === 'user' && reducerMsg.text !== null) {
         const displayText = typeof reducerMsg.meta?.displayText === 'string' ? reducerMsg.meta.displayText : undefined;
         return {

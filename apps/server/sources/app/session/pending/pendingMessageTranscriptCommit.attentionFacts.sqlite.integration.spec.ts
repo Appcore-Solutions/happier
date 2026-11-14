@@ -64,6 +64,7 @@ describe("pending transcript commit stamps session attention facts (SQLite integ
             localId,
             content: { t: "encrypted", c: `cipher-${localId}` },
             messageRole: "user",
+            pendingAuthorAccountId: null,
         }));
     }
 

@@ -38,6 +38,7 @@ import {
     type SessionReadCursorReadState,
 } from "./readCursor/resolveSessionReadCursorOperation";
 import { parseSessionMessageRole, resolveSessionMessageRole } from "./messageRole/resolveSessionMessageRole";
+import { resolveSessionMessageAuthorAccountId } from "./resolveSessionMessageAuthorAccountId";
 import {
     resolveSessionUnreadSinceWrite,
     type SessionUnreadInputs,
@@ -66,6 +67,7 @@ type SessionMessageWriteRow = {
     localId: string | null;
     sidechainId: string | null;
     messageRole: SessionMessageRole | null;
+    authorAccountId: string | null;
     content: PrismaJson.SessionMessageContent;
     createdAt: Date;
     updatedAt: Date;
@@ -80,6 +82,7 @@ const SESSION_MESSAGE_WRITE_SELECT = {
     localId: true,
     sidechainId: true,
     messageRole: true,
+    authorAccountId: true,
     content: true,
     createdAt: true,
     updatedAt: true,
@@ -1245,6 +1248,10 @@ export async function createSessionMessage(
                     localId,
                     sidechainId,
                     messageRole: resolvedRole,
+                    authorAccountId: resolveSessionMessageAuthorAccountId({
+                        messageRole: resolvedRole,
+                        submittedBy: actorUserId,
+                    }),
                     createdAt: messageCreatedAt,
                     ...(sourceCreatedAt ? { sourceCreatedAt } : {}),
                     ...(sourceUpdatedAt ? { sourceUpdatedAt } : {}),

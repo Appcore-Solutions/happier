@@ -1,7 +1,7 @@
 import { createReadStream, existsSync, mkdirSync, openSync, readFileSync, readdirSync, statSync, unlinkSync, writeFileSync, closeSync } from 'node:fs';
 import { appendFile, mkdir, readFile, rename, rm, stat } from 'node:fs/promises';
 import { createServer as createHttpServer, type IncomingMessage, type ServerResponse } from 'node:http';
-import { extname, dirname, resolve as resolvePath } from 'node:path';
+import { extname, dirname, resolve as resolvePath, sep } from 'node:path';
 import { createHash } from 'node:crypto';
 import { repoRootDir } from '../paths';
 import { reserveAvailablePort } from '../network/reserveAvailablePort';
@@ -456,7 +456,8 @@ function injectBootstrap(html: string, config: UiWebRuntimeConfig): string {
 function resolveRequestFilePath(distDir: string, pathname: string): { filePath: string; isHtmlShell: boolean } {
   const normalizedPath = pathname === '/' ? '/index.html' : pathname;
   const candidate = resolvePath(distDir, `.${normalizedPath}`);
-  const isWithinDist = candidate === distDir || candidate.startsWith(`${distDir}/`);
+  // `resolvePath` returns platform separators, so containment uses `sep` (backslash on Windows).
+  const isWithinDist = candidate === distDir || candidate.startsWith(`${distDir}${sep}`);
   if (isWithinDist && existsSync(candidate)) {
     return { filePath: candidate, isHtmlShell: candidate.endsWith('index.html') };
   }

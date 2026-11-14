@@ -92,7 +92,9 @@ import {
   deriveTranscriptInteractionFromSession,
   type TranscriptInteraction,
 } from '@/utils/sessions/deriveTranscriptInteraction';
-import { useSessionInteractionSource, useSessionReferenceTarget } from '@/sync/domains/state/storage';
+import { useSessionInteractionSource, useSessionReferenceTarget, useUser } from '@/sync/domains/state/storage';
+import { getDisplayName } from '@/sync/domains/social/friendTypes';
+import { Avatar } from '@/components/ui/avatar/Avatar';
 import { Icon, ICON_SIZE } from '@/components/ui/icons/Icon';
 import { getSessionDisplayTitle } from '@/utils/sessions/sessionUtils';
 
@@ -536,6 +538,47 @@ function SessionMessageProvenanceAttribution(props: Readonly<{
   );
 }
 
+const MESSAGE_AUTHOR_AVATAR_SIZE = 16;
+
+/**
+ * Who sent a prompt in a shared Session. Mounted only for a prompt whose server-stamped author is
+ * not the viewer, so ordinary single-user transcripts keep no profile subscription per row.
+ */
+function SessionMessageAuthorAttribution(props: Readonly<{
+  messageId: string;
+  authorAccountId: string;
+}>) {
+  const { authorAccountId } = props;
+  const author = useUser(authorAccountId);
+  React.useEffect(() => {
+    if (author === undefined) fireAndForget(sync.assumeUsers([authorAccountId]), { tag: 'transcript.authorProfile' });
+  }, [author, authorAccountId]);
+  // A profile that is still resolving or no longer exists keeps the same row, so the bubble below
+  // it never shifts when the name arrives.
+  const name = author ? getDisplayName(author) : t('message.authorUnknown');
+  return (
+    <View style={[styles.messageProvenanceAttributionRow, styles.messageAuthorAttributionRow]}>
+      <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+        <Avatar
+          id={authorAccountId}
+          size={MESSAGE_AUTHOR_AVATAR_SIZE}
+          imageUrl={author?.avatar?.url || author?.avatar?.path || null}
+          thumbhash={author?.avatar?.thumbhash ?? null}
+        />
+      </View>
+      <Text
+        testID={`transcript-author-attribution:${props.messageId}`}
+        selectable
+        accessibilityRole="text"
+        accessibilityLabel={t('message.sentBy', { name })}
+        style={[styles.discardedCommittedMessageLabel, styles.messageProvenanceAttributionText]}
+      >
+        {name}
+      </Text>
+    </View>
+  );
+}
+
 function UserTextBlock(props: {
   message: UserTextMessage;
   metadata: Metadata | null;
@@ -563,6 +606,15 @@ function UserTextBlock(props: {
   const router = useRouter();
   const isDiscarded = isCommittedMessageDiscarded(props.metadata, props.message.localId);
   const provenance = readSessionMessageProvenanceV1(props.message.meta);
+  const viewerAccountId = props.messageDisplayCommon.viewerAccountId;
+  const otherAuthorAccountId = props.message.authorAccountId !== undefined
+    && viewerAccountId != null
+    && props.message.authorAccountId !== viewerAccountId
+    ? props.message.authorAccountId
+    : null;
+  const authorAttribution = otherAuthorAccountId !== null
+    ? <SessionMessageAuthorAttribution messageId={props.message.id} authorAccountId={otherAuthorAccountId} />
+    : null;
   const quoteMarkdownProps = useTranscriptQuoteMarkdownProps(props.sessionId, !isDiscarded && props.historical !== true);
   const handleJumpToAnchor = useStructuredMessageJumpHandler(props.sessionId, props.canOpenFiles);
 
@@ -741,6 +793,7 @@ function UserTextBlock(props: {
             radius={TRANSCRIPT_MESSAGE_HIGHLIGHT_RADIUS}
             style={styles.structuredUserMessageContent}
           >
+            {authorAttribution}
             {provenance ? <SessionMessageProvenanceAttribution messageId={props.message.id} provenance={provenance} /> : null}
             {structuredNode}
             {sessionMediaInlineImages.length > 0 ? (
@@ -858,6 +911,7 @@ function UserTextBlock(props: {
           style={styles.userMessageWrapper}
           {...(isWeb ? {} : { pointerEvents: 'box-none' as const })}
         >
+          {authorAttribution}
           {provenance ? <SessionMessageProvenanceAttribution messageId={props.message.id} provenance={provenance} /> : null}
           <View style={styles.userMessageBubbleAligner}>
             <TranscriptJumpAttention
@@ -1820,6 +1874,9 @@ const styles = StyleSheet.create((theme) => ({
   messageProvenanceAttributionText: {
     marginTop: 0,
     flexShrink: 1,
+  },
+  messageAuthorAttributionRow: {
+    alignItems: 'center',
   },
   structuredUserMessageContainer: {
     maxWidth: '100%',

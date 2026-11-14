@@ -8987,6 +8987,8 @@ settingsSession: {
     message: {
         provenanceFrom: ({ source }: { source: string }) => `來自 ${source}`,
         provenanceSession: '工作階段',
+        sentBy: ({ name }: { name: string }) => `由 ${name} 傳送`,
+        authorUnknown: '其他參與者',
         sessionReferenceUnavailable: '無法使用的工作階段',
         sessionReferenceOpen: ({ name }: { name: string }) => `開啟工作階段 ${name}`,
         switchedToMode: ({ mode }: { mode: string }) => `已切換到 ${mode} 模式`,

@@ -26,6 +26,8 @@ import { lazySchema } from './lazySchema.js';
 const TimestampMsSchema = lazySchema(() => z.number().int().min(0));
 const Base64Schema = lazySchema(() => z.string());
 const SessionMessageRoleMetadataSchema = lazySchema(() => SessionMessageRoleSchema.nullable().optional());
+/** Server-stamped Account that submitted a user-role message; absent for other rows and older servers. */
+const SessionMessageAuthorAccountIdSchema = lazySchema(() => z.string().min(1).optional());
 
 const VersionedNullableStringSchema = lazySchema(() => z.object({
   value: z.string().nullable(),
@@ -49,6 +51,7 @@ export const UpdateBodySchema = lazySchema(() => z.discriminatedUnion('t', [
         localId: z.string().nullable(),
         sidechainId: z.string().nullable().optional(),
         messageRole: SessionMessageRoleMetadataSchema,
+        authorAccountId: SessionMessageAuthorAccountIdSchema,
         attentionImpact: SessionMessageAttentionImpactSchema.optional(),
         createdAt: TimestampMsSchema,
         updatedAt: TimestampMsSchema,
@@ -70,6 +73,7 @@ export const UpdateBodySchema = lazySchema(() => z.discriminatedUnion('t', [
         localId: z.string().nullable(),
         sidechainId: z.string().nullable().optional(),
         messageRole: SessionMessageRoleMetadataSchema,
+        authorAccountId: SessionMessageAuthorAccountIdSchema,
         attentionImpact: SessionMessageAttentionImpactSchema.optional(),
         createdAt: TimestampMsSchema,
         updatedAt: TimestampMsSchema,

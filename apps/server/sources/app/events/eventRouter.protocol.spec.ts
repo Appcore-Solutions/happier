@@ -24,6 +24,7 @@ describe("eventRouter payloads (protocol container)", () => {
                 localId: "l1",
                 sidechainId: null,
                 messageRole: "user",
+                authorAccountId: "friend-account",
                 content: { t: "encrypted", c: "abc" },
                 createdAt: new Date(1),
                 updatedAt: new Date(1),
@@ -33,7 +34,9 @@ describe("eventRouter payloads (protocol container)", () => {
             "upd-1",
         );
 
-        expect(UpdateContainerSchema.safeParse(payload).success).toBe(true);
+        const parsed = UpdateContainerSchema.safeParse(payload);
+        expect(parsed.success).toBe(true);
+        expect(parsed.data?.body).toMatchObject({ t: "new-message", message: { authorAccountId: "friend-account" } });
         expect((payload.body as any).sid).toBe("s1");
         expect((payload.body as any).id).toBe("s1");
         expect((payload.body as any).message.messageRole).toBe("user");

@@ -19,6 +19,7 @@ type UpdateMessagePayloadInput = Readonly<{
     localId: string | null;
     sidechainId?: string | null;
     messageRole?: SessionMessageRole | null;
+    authorAccountId?: string | null;
     createdAt: Date;
     updatedAt: Date;
     sourceCreatedAt?: Date | null;
@@ -79,6 +80,7 @@ function serializeUpdateMessage(message: UpdateMessagePayloadInput, options?: Up
         localId: message.localId,
         ...(typeof message.sidechainId === "string" && message.sidechainId ? { sidechainId: message.sidechainId } : {}),
         ...(typeof message.messageRole === "string" ? { messageRole: message.messageRole } : {}),
+        ...(typeof message.authorAccountId === "string" ? { authorAccountId: message.authorAccountId } : {}),
         attentionImpact,
         createdAt: message.createdAt.getTime(),
         updatedAt: message.updatedAt.getTime(),

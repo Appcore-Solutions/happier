@@ -57,6 +57,23 @@ describe('sync.assumeUsers', () => {
         expect(storage.getState().users.user_missing).toBeNull();
     });
 
+    it('shares one profile request across concurrent callers for the same missing user', async () => {
+        let resolveProfile: (profile: unknown) => void = () => {};
+        (getUserProfile as any).mockImplementationOnce(() => new Promise((resolve) => {
+            resolveProfile = resolve;
+        }));
+
+        const { sync } = await import('./sync');
+        // Every transcript row by one author asks for the same profile as the rows mount together.
+        const first = sync.assumeUsers(['user_shared']);
+        const second = sync.assumeUsers(['user_shared', 'user_shared']);
+        resolveProfile({ id: 'user_shared', firstName: 'Ada', lastName: null, username: 'ada' });
+        await Promise.all([first, second]);
+
+        expect(getUserProfile).toHaveBeenCalledTimes(1);
+        expect(storage.getState().users.user_shared).toMatchObject({ id: 'user_shared' });
+    });
+
     it('caches null when user fetch throws a 404-shaped error', async () => {
         (getUserProfile as any).mockRejectedValueOnce({ status: 404 });
 

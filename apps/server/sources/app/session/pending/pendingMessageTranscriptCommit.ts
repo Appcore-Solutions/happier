@@ -1,5 +1,6 @@
 import { parseSessionMessageRole } from "@/app/session/messageRole/resolveSessionMessageRole";
 import { stampMissingSessionUnreadSince } from "@/app/session/attention/sessionAttentionFacts";
+import { resolveSessionMessageAuthorAccountId } from "@/app/session/resolveSessionMessageAuthorAccountId";
 import type { Tx } from "@/storage/inTx";
 import {
     readPendingLocalId,
@@ -12,11 +13,24 @@ export type PendingTranscriptMessage = {
     seq: number;
     localId: string;
     messageRole: SessionMessageRole | null;
+    authorAccountId: string | null;
     content: PrismaJson.SessionMessageContent;
     deliveryResolution?: Readonly<{ v: 1; kind: "manual_handled" }> | null;
     createdAt: Date;
     updatedAt: Date;
 };
+
+const PENDING_TRANSCRIPT_MESSAGE_SELECT = {
+    id: true,
+    seq: true,
+    localId: true,
+    messageRole: true,
+    authorAccountId: true,
+    content: true,
+    deliveryResolution: true,
+    createdAt: true,
+    updatedAt: true,
+} as const;
 
 export function resolvePendingTranscriptCompatibility(params: {
     existing: {
@@ -55,6 +69,8 @@ export async function createSessionMessageFromPending(tx: Tx, params: {
     localId: string;
     content: PrismaJson.SessionMessageContent;
     messageRole: SessionMessageRole | null;
+    /** The Pending row's stamped author; the settling actor is the owner's runtime, not the author. */
+    pendingAuthorAccountId: string | null;
 }): Promise<{
     ok: true;
     didWrite: boolean;
@@ -72,7 +88,7 @@ export async function createSessionMessageFromPending(tx: Tx, params: {
 
     const existing = await tx.sessionMessage.findFirst({
         where: { sessionId, localId },
-        select: { id: true, seq: true, localId: true, messageRole: true, content: true, deliveryResolution: true, createdAt: true, updatedAt: true },
+        select: PENDING_TRANSCRIPT_MESSAGE_SELECT,
     });
     if (existing && existing.localId) {
         const compatibility = resolvePendingTranscriptCompatibility({
@@ -88,7 +104,7 @@ export async function createSessionMessageFromPending(tx: Tx, params: {
                     ...(needsRoleUpdate ? { messageRole } : {}),
                     rowRevision: { increment: 1 },
                 },
-                select: { id: true, seq: true, localId: true, messageRole: true, content: true, deliveryResolution: true, createdAt: true, updatedAt: true },
+                select: PENDING_TRANSCRIPT_MESSAGE_SELECT,
             })
             : existing;
         return {
@@ -100,6 +116,7 @@ export async function createSessionMessageFromPending(tx: Tx, params: {
                 seq: row.seq,
                 localId: row.localId ?? localId,
                 messageRole: parseSessionMessageRole(row.messageRole),
+                authorAccountId: row.authorAccountId,
                 content: row.content as PrismaJson.SessionMessageContent,
                 deliveryResolution: row.deliveryResolution as PendingTranscriptMessage["deliveryResolution"],
                 createdAt: row.createdAt,
@@ -134,9 +151,13 @@ export async function createSessionMessageFromPending(tx: Tx, params: {
             content,
             localId,
             messageRole,
+            authorAccountId: resolveSessionMessageAuthorAccountId({
+                messageRole,
+                submittedBy: params.pendingAuthorAccountId,
+            }),
             createdAt: messageCreatedAt,
         },
-        select: { id: true, seq: true, localId: true, messageRole: true, content: true, deliveryResolution: true, createdAt: true, updatedAt: true },
+        select: PENDING_TRANSCRIPT_MESSAGE_SELECT,
     });
 
     return {
@@ -148,6 +169,7 @@ export async function createSessionMessageFromPending(tx: Tx, params: {
             seq: created.seq,
             localId: created.localId!,
             messageRole: parseSessionMessageRole(created.messageRole),
+            authorAccountId: created.authorAccountId,
             content: created.content as PrismaJson.SessionMessageContent,
             deliveryResolution: created.deliveryResolution as PendingTranscriptMessage["deliveryResolution"],
             createdAt: created.createdAt,

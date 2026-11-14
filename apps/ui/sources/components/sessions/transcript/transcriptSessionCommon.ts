@@ -11,6 +11,7 @@ import {
     useSessionForkSupportSource,
     useSessionMessagesById,
     useSessionMessagesReducerState,
+    useActiveServerAccountScope,
     useSessionWorkspacePath,
     useSetting,
 } from '@/sync/domains/state/storage';
@@ -55,6 +56,13 @@ export type TranscriptMessageDisplayCommon = Pick<TranscriptSessionCommonSetting
      * themselves, as they already do for every other setting here.
      */
     debugInformationEnabled: boolean;
+    /**
+     * The viewer's Account on THIS Session's server, resolved once per transcript. User prompts by
+     * any other Account show who sent them. Absent or null means the viewer's identity on that
+     * server is unknown (for example a Session from a server other than the active account's), and
+     * then no row claims an author.
+     */
+    viewerAccountId?: string | null;
 }>;
 
 export type TranscriptForkCommon = Pick<TranscriptSessionCommonSettings,
@@ -134,6 +142,10 @@ export function useTranscriptSessionCommon(sessionId: string): TranscriptSession
         serverId: forkSpawnServerId,
     });
     const debugInformationEnabled = useSessionDebugInformationEnabled();
+    const activeServerAccountScope = useActiveServerAccountScope();
+    const viewerAccountId = activeServerAccountScope !== null && activeServerAccountScope.serverId === forkSpawnServerId
+        ? activeServerAccountScope.accountId
+        : null;
 
     const sessionReplayEnabled = useSetting('sessionReplayEnabled');
     const sessionReplayMaxSeedChars = useSetting('sessionReplayMaxSeedChars');
@@ -183,6 +195,7 @@ export function useTranscriptSessionCommon(sessionId: string): TranscriptSession
             transcriptStreamingPartialOutputEnabled,
             transcriptStreamingSettleDelayMs,
             transcriptStreamingSmoothingEnabled,
+            viewerAccountId,
             workspacePath,
         }), [
             debugInformationEnabled,
@@ -196,6 +209,7 @@ export function useTranscriptSessionCommon(sessionId: string): TranscriptSession
             transcriptStreamingPartialOutputEnabled,
             transcriptStreamingSettleDelayMs,
             transcriptStreamingSmoothingEnabled,
+            viewerAccountId,
             workspacePath,
         ]);
 

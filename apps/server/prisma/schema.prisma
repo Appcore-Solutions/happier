@@ -672,6 +672,11 @@ model SessionMessage {
     sidechainId String?
     seq       Int
     messageRole String?
+    /// Account that submitted this user-role message, stamped by the server from the authenticated
+    /// writer (or the Pending row's author on settlement). Null for non-user rows and rows written
+    /// before attribution existed. Deliberately not a foreign key: account deletion must not rewrite
+    /// transcript history, and an unknown id simply resolves to no profile.
+    authorAccountId String?
     /// [SessionMessageContent]
     content   Json
     /// Source chronology is provider-observed; createdAt/updatedAt remain server ingestion chronology.

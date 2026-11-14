@@ -1256,6 +1256,34 @@ describe("pendingMessageService (shared sessions)", () => {
         await expect(db.sessionMessage.count({ where: { sessionId: session.id, localId } })).resolves.toBe(1);
     });
 
+    it("attributes a settled shared-session prompt to the participant who queued it, not the settling owner", async () => {
+        const owner = await createAccount("author-owner");
+        const friend = await createAccount("author-friend");
+        const session = await createSession(owner.id);
+        await shareSession({ sessionId: session.id, ownerId: owner.id, participantId: friend.id, accessLevel: "edit" });
+        const localId = `friend-prompt-${randomUUID()}`;
+
+        await expect(enqueuePendingMessage({
+            actorUserId: friend.id,
+            sessionId: session.id,
+            localId,
+            ciphertext: "cipher-friend-prompt",
+            messageRole: "user",
+        })).resolves.toMatchObject({ ok: true });
+        await expect(materializeNextPendingMessage({
+            actorUserId: owner.id,
+            sessionId: session.id,
+            deliveryState: "provider",
+        })).resolves.toMatchObject({ ok: true, didMaterialize: true });
+
+        await expect(resolveAcceptedPendingDelivery({ actorUserId: owner.id, sessionId: session.id, localId }))
+            .resolves.toMatchObject({ ok: true, didResolve: true, message: { localId, authorAccountId: friend.id } });
+        await expect(db.sessionMessage.findUniqueOrThrow({
+            where: { sessionId_localId: { sessionId: session.id, localId } },
+            select: { authorAccountId: true },
+        })).resolves.toEqual({ authorAccountId: friend.id });
+    });
+
     it.each([
         {
             mode: "e2ee" as const,

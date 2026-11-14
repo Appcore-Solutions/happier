@@ -985,6 +985,7 @@ class Sync {
         serverID!: string;
         anonID: string | null = null;
         private credentials!: AuthCredentials;
+        private readonly userProfileFetchesInFlight = new Map<string, Readonly<{ credentials: AuthCredentials; fetch: Promise<void> }>>();
         private pauseController = new PauseController();
         private syncTuning: SyncTuning = loadSyncTuning();
         private readonly snapshotSyncAttemptLimiter = createTaskLimiter(this.syncTuning.bootstrapConcurrencyLimit);
@@ -4110,14 +4111,43 @@ class Sync {
     }
 
     async assumeUsers(userIds: string[]): Promise<void> {
-        if (!this.credentials || userIds.length === 0) return;
-        
+        const credentials = this.credentials;
+        if (!credentials || userIds.length === 0) return;
+
         const state = storage.getState();
         // Filter out users we already have in cache (including null for 404s)
-        const missingIds = userIds.filter(id => !(id in state.users));
-        
+        const missingIds = Array.from(new Set(userIds)).filter(id => !(id in state.users));
         if (missingIds.length === 0) return;
 
+        // Concurrent callers (for example every transcript row by one author mounting together) share
+        // the request already in flight for an id under the same credentials instead of repeating it.
+        const awaited: Promise<void>[] = [];
+        const freshIds: string[] = [];
+        for (const id of missingIds) {
+            const inFlight = this.userProfileFetchesInFlight.get(id);
+            if (inFlight && inFlight.credentials === credentials) {
+                awaited.push(inFlight.fetch);
+            } else {
+                freshIds.push(id);
+            }
+        }
+        if (freshIds.length > 0) {
+            const fetch = this.fetchAndApplyUserProfiles(credentials, freshIds);
+            for (const id of freshIds) {
+                this.userProfileFetchesInFlight.set(id, { credentials, fetch });
+            }
+            awaited.push(fetch.finally(() => {
+                for (const id of freshIds) {
+                    if (this.userProfileFetchesInFlight.get(id)?.fetch === fetch) {
+                        this.userProfileFetchesInFlight.delete(id);
+                    }
+                }
+            }));
+        }
+        await Promise.all(awaited);
+    }
+
+    private async fetchAndApplyUserProfiles(credentials: AuthCredentials, missingIds: readonly string[]): Promise<void> {
         const isNotFoundError = (error: unknown): boolean => {
             const e = error as any;
             const status =
@@ -4134,7 +4164,7 @@ class Sync {
         const results = await Promise.all(
             missingIds.map(async (id) => {
                 try {
-                    const profile = await getUserProfile(this.credentials!, id);
+                    const profile = await getUserProfile(credentials, id);
                     return { id, profile, cache: true };
                 } catch (error) {
                     if (isNotFoundError(error)) {

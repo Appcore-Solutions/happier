@@ -90,6 +90,7 @@ const SESSION_MESSAGE_LIST_SELECT = {
     localId: true,
     sidechainId: true,
     messageRole: true,
+    authorAccountId: true,
     content: true,
     createdAt: true,
     updatedAt: true,
@@ -105,7 +106,8 @@ type SessionMessageListRow = Readonly<{
     localId: string | null;
     sidechainId: string | null;
     messageRole: string | null;
-    content: unknown;
+    authorAccountId: string | null;
+    content: PrismaJson.SessionMessageContent;
     createdAt: Date;
     updatedAt: Date;
     sourceCreatedAt: Date | null;
@@ -125,6 +127,7 @@ function serializeSessionMessageListRow(v: SessionMessageListRow) {
             const messageRole = parseSessionMessageRole(v.messageRole);
             return messageRole ? { messageRole } : {};
         })(),
+        ...(v.authorAccountId ? { authorAccountId: v.authorAccountId } : {}),
         createdAt: v.createdAt.getTime(),
         updatedAt: v.updatedAt.getTime(),
         ...(v.sourceCreatedAt ? { sourceCreatedAt: v.sourceCreatedAt.getTime() } : {}),
@@ -157,6 +160,7 @@ export function registerSessionMessageRoutes(app: Fastify) {
                         localId: z.string().nullable(),
                         sidechainId: z.string().nullable().optional(),
                         messageRole: SessionMessageRoleSchema.nullable().optional(),
+                        authorAccountId: z.string().optional(),
                         content: SessionStoredMessageContentSchema,
                         createdAt: z.number().int().min(0),
                         updatedAt: z.number().int().min(0),
@@ -184,48 +188,13 @@ export function registerSessionMessageRoutes(app: Fastify) {
 
         const row = await db.sessionMessage.findUnique({
             where: { sessionId_localId: { sessionId, localId } },
-            select: {
-                id: true,
-                seq: true,
-                localId: true,
-                sidechainId: true,
-                content: true,
-                messageRole: true,
-                createdAt: true,
-                updatedAt: true,
-                sourceCreatedAt: true,
-                sourceUpdatedAt: true,
-                transcriptObservationProvenance: true,
-                deliveryResolution: true,
-            },
+            select: SESSION_MESSAGE_LIST_SELECT,
         });
         if (!row) {
             return reply.code(404).send({ error: 'Message not found' });
         }
 
-        const messageRole = parseSessionMessageRole(row.messageRole);
-        const transcriptObservationProvenance = SessionTranscriptObservationProvenanceV1Schema.safeParse(
-            row.transcriptObservationProvenance,
-        );
-        const deliveryResolution = SessionMessageDeliveryResolutionV1Schema.safeParse(row.deliveryResolution);
-        return reply.send({
-            message: {
-                id: row.id,
-                seq: row.seq,
-                localId: row.localId,
-                ...(typeof row.sidechainId === "string" && row.sidechainId ? { sidechainId: row.sidechainId } : {}),
-                ...(messageRole ? { messageRole } : {}),
-                content: row.content,
-                createdAt: row.createdAt.getTime(),
-                updatedAt: row.updatedAt.getTime(),
-                ...(row.sourceCreatedAt ? { sourceCreatedAt: row.sourceCreatedAt.getTime() } : {}),
-                ...(row.sourceUpdatedAt ? { sourceUpdatedAt: row.sourceUpdatedAt.getTime() } : {}),
-                ...(transcriptObservationProvenance.success
-                    ? { transcriptObservationProvenance: transcriptObservationProvenance.data }
-                    : {}),
-                ...(deliveryResolution.success ? { deliveryResolution: deliveryResolution.data } : {}),
-            },
-        });
+        return reply.send({ message: serializeSessionMessageListRow(row) });
     });
 
     app.get('/v1/sessions/:sessionId/messages', {

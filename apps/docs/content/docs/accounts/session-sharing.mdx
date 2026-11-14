@@ -37,6 +37,14 @@ Read that literally. The session runs on your machine, so this hands someone els
 
 It is a per-person setting, not a fourth access level, and you can turn it on when you add the share or later. Happier tells you when it is unavailable and why — public links are read-only, view-only access cannot approve, an inactive session has nothing to approve, or the owner simply did not grant it.
 
+### Seeing who sent each message
+
+In development builds with a supporting relay, every message someone else sends in a shared session shows who sent it, with their avatar and name above the message. That covers the session owner too: when you open a session someone shared with you, their messages are labelled with their name. Your own messages carry no label.
+
+The relay records the sender from the signed-in account that submitted the message, so nobody can send a message under someone else's name. That includes messages that wait in the pending queue: the label appears once the agent picks the message up, not while it is still queued.
+
+Messages sent before this existed show no sender, and neither do messages in a session that belongs to a server other than your currently active one. If Happier cannot load someone's profile, it shows **Another participant** in place of their name.
+
 ### Managing shares
 
 From the same screen you can see everyone the session is shared with, change a level, turn approval delegation on or off, and stop sharing with someone — which revokes their access immediately.

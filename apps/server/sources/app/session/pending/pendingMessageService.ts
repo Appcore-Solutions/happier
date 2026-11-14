@@ -493,6 +493,7 @@ export async function enqueuePendingMessage(params: {
                     localId: true,
                     content: true,
                     messageRole: true,
+                    authorAccountId: true,
                     deliveryResolution: true,
                     createdAt: true,
                     updatedAt: true,
@@ -518,6 +519,7 @@ export async function enqueuePendingMessage(params: {
                         seq: terminalTranscript.seq,
                         localId: terminalTranscript.localId ?? localId,
                         messageRole: compatibility.existingMessageRole,
+                        authorAccountId: terminalTranscript.authorAccountId,
                         content: terminalTranscript.content as PrismaJson.SessionMessageContent,
                         requestedAction,
                         ...(deliveryResolution.success ? { deliveryResolution: deliveryResolution.data } : {}),
@@ -1089,6 +1091,7 @@ type PendingDeliveryResolutionInput = Readonly<{
     deliveryBlockedReason?: string | null;
     discardedReason?: string | null;
     messageRole: string | null;
+    authorAccountId: string | null;
     content: unknown;
     requestedAction?: unknown;
     position: number;
@@ -1199,6 +1202,7 @@ async function commitResolvedPendingDelivery(
         localId: params.localId,
         content,
         messageRole,
+        pendingAuthorAccountId: params.existing.authorAccountId,
     });
     if (!committed.ok) {
         const blocked = await markPendingDeliveryRowsBlocked(tx, {
@@ -1319,7 +1323,7 @@ export async function resolveAcceptedPendingDelivery(params: {
             }
             const existing = await tx.sessionPendingMessage.findUnique({
                 where: { sessionId_localId: { sessionId, localId } },
-                select: { status: true, deliveryState: true, deliveryBlockedReason: true, discardedReason: true, messageRole: true, content: true, requestedAction: true, position: true },
+                select: { status: true, deliveryState: true, deliveryBlockedReason: true, discardedReason: true, messageRole: true, authorAccountId: true, content: true, requestedAction: true, position: true },
             });
 
             if (!existing) {
@@ -1332,7 +1336,7 @@ export async function resolveAcceptedPendingDelivery(params: {
                             { messageRole: null },
                         ],
                     },
-                    select: { id: true, seq: true, localId: true, messageRole: true, content: true, deliveryResolution: true, createdAt: true, updatedAt: true },
+                    select: { id: true, seq: true, localId: true, messageRole: true, authorAccountId: true, content: true, deliveryResolution: true, createdAt: true, updatedAt: true },
                 });
                 if (!committed) {
                     return { ok: false, error: "not-found" } as const;
@@ -1357,6 +1361,7 @@ export async function resolveAcceptedPendingDelivery(params: {
                         seq: committed.seq,
                         localId: committed.localId ?? localId,
                         messageRole: parseSessionMessageRole(committed.messageRole),
+                        authorAccountId: committed.authorAccountId,
                         content: committed.content as PrismaJson.SessionMessageContent,
                         ...(deliveryResolution.success ? { deliveryResolution: deliveryResolution.data } : {}),
                         createdAt: committed.createdAt,
@@ -1617,7 +1622,7 @@ export async function markPendingDeliveryHandled(params: {
         return await retryPendingDeliveryResolutionRace(() => inTx(async (tx) => {
             const existing = await tx.sessionPendingMessage.findUnique({
                 where: { sessionId_localId: { sessionId, localId } },
-                select: { status: true, deliveryState: true, deliveryBlockedReason: true, discardedReason: true, messageRole: true, content: true, requestedAction: true, position: true },
+                select: { status: true, deliveryState: true, deliveryBlockedReason: true, discardedReason: true, messageRole: true, authorAccountId: true, content: true, requestedAction: true, position: true },
             });
             const canMarkHandled = existing !== null && isPendingDeliveryStatusTransitionAllowedV1(
                 normalizePendingDeliveryStatusV1(existing),

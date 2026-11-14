@@ -10887,6 +10887,8 @@ settingsSession: {
   message: {
     provenanceFrom: ({ source }: { source: string }) => `От ${source}`,
     provenanceSession: 'Сессия',
+    sentBy: ({ name }: { name: string }) => `Отправлено: ${name}`,
+    authorUnknown: 'Другой участник',
     sessionReferenceUnavailable: "Сессия недоступна",
     sessionReferenceOpen: ({ name }: { name: string }) => `Открыть сессию ${name}`,
     switchedToMode: ({ mode }: { mode: string }) =>

@@ -11229,6 +11229,8 @@ settingsSession: {
   message: {
     provenanceFrom: ({ source }: { source: string }) => `${source} から`,
     provenanceSession: 'セッション',
+    sentBy: ({ name }: { name: string }) => `${name} が送信`,
+    authorUnknown: '他の参加者',
     sessionReferenceUnavailable: "利用できないセッション",
     sessionReferenceOpen: ({ name }: { name: string }) => `セッション ${name} を開く`,
     switchedToMode: ({ mode }: { mode: string }) =>

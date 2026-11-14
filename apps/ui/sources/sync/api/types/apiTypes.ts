@@ -19,6 +19,7 @@ export const ApiMessageSchema = z.object({
     localId: z.string().nullish(),
     sidechainId: z.string().nullable().optional(),
     messageRole: SessionMessageRoleSchema.nullable().optional(),
+    authorAccountId: z.string().min(1).optional(),
     attentionImpact: SessionMessageAttentionImpactSchema.optional(),
     content: SessionStoredMessageContentSchema,
     createdAt: z.number(),
