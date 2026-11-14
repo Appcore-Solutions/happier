@@ -196,9 +196,10 @@ export const UI_FEATURE_REGISTRY = {
     'social.friends': {
         settingsToggle: {
             showInSettings: true,
-            isExperimental: true,
-            // Historically not auto-enabled by the experiments master switch; keep it opt-in.
-            defaultEnabled: false,
+            // Promoted in this fork: friends join a shared relay to use sharing and display names,
+            // so Friends is a standard setting that starts on (people can still switch it off).
+            isExperimental: false,
+            defaultEnabled: true,
             titleKey: 'settingsFeatures.expFriends',
             subtitleKey: 'settingsFeatures.expFriendsSubtitle',
             icon: { ioniconName: 'people-outline', color: '#007AFF' },

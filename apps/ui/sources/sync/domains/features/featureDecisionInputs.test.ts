@@ -43,10 +43,10 @@ describe('featureDecisionInputs', () => {
         resetServerFeaturesClientForTests();
     });
 
-    it('returns a local-policy disabled decision when experiments are off', async () => {
+    it('returns a local-policy disabled decision when the person turned the feature off', async () => {
         storage.getState().applySettingsLocal({
             experiments: false,
-            featureToggles: { 'social.friends': true },
+            featureToggles: { 'social.friends': false },
         });
 
         vi.stubGlobal(

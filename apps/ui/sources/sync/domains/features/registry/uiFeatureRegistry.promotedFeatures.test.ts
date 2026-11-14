@@ -18,6 +18,7 @@ const promotedFeatureIds = [
     'files.syntaxHighlighting.advanced',
     'sessions.direct',
     'sessions.folders',
+    'social.friends',
 ] satisfies FeatureId[];
 
 describe('UI promoted feature registry', () => {

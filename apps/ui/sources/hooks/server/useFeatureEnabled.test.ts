@@ -96,7 +96,7 @@ describe('useFeatureEnabled', () => {
         const { getStorage } = await import('@/sync/domains/state/storage');
         getStorage().getState().applySettingsLocal({
             experiments: false,
-            featureToggles: { 'social.friends': true },
+            featureToggles: { 'social.friends': false },
         });
 
         const { useFeatureEnabled } = await import('./useFeatureEnabled');
